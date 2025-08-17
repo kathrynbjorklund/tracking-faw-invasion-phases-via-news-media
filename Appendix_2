@@ -1,0 +1,64 @@
+# Appendix 2
+
+# Model Diagnostics
+
+#Packages
+library(quanteda)
+library(stm)
+library(tidyverse)
+library(tidytext)
+library(furrr)
+
+#Prep for running diagnostics
+plan(multisession)
+
+#Run plan(sequential) between iterations
+
+heldout <- make.heldout(dfm, seed=1234)
+
+many_models <- tibble(K = seq.int(from = 10, to = 100, by=1)) %>%
+  mutate(topic_model = future_map(K, ~stm(documents = heldout$documents, vocab = heldout$vocab,
+                                          K = .,
+                                          verbose = FALSE, seed = 1234)))
+
+k_result <- many_models %>%
+  mutate(exclusivity = map(topic_model, exclusivity),
+         semantic_coherence = map(topic_model, semanticCoherence, heldout$documents),
+         eval_heldout = map(topic_model, eval.heldout, heldout$missing),
+         residual = map(topic_model, checkResiduals, heldout$documents),
+         bound =  map_dbl(topic_model, function(x) max(x$convergence$bound)),
+         lfact = map_dbl(topic_model, function(x) lfactorial(x$settings$dim$K)),
+         lbound = bound + lfact,
+         iterations = map_dbl(topic_model, function(x) length(x$convergence$bound)))
+
+# Plot
+
+library(ggplot2)
+library(dplyr)
+library(purrr)
+library(tidyr)
+
+max_K <- max(k_result$K)
+
+k_result %>%
+  transmute(K,
+            `Lower bound` = lbound,
+            Residuals = map_dbl(residual, "dispersion"),
+            `Semantic coherence` = map_dbl(semantic_coherence, mean),
+            `Held-out likelihood` = map_dbl(eval_heldout, "expected.heldout")) %>%
+  gather(Metric, Value, -K) %>%
+  ggplot(aes(K, Value)) +  # <- removed `color = Metric` here
+  geom_line(size = 1.5, alpha = 0.7, color = "#ef3b2c", show.legend = FALSE) + 
+  facet_wrap(~Metric, scales = "free_y") +
+  labs(x = "K (number of topics)", y = NULL) +
+  theme_minimal() +
+  theme(
+    strip.background = element_rect(fill = "grey80", color = NA),
+    strip.text = element_text(size = 12, color = "black"),
+    plot.margin = unit(c(1, 1, 1, 1), "cm")
+  ) +
+  geom_text(data = data.frame(Metric = c("Held-out likelihood", "Lower bound", "Residuals", "Semantic coherence"),
+                              label = c("(a)", "(b)", "(c)", "(d)")),
+            aes(x = 0.9 * max_K, y = Inf, label = label),
+            hjust = 1, vjust = 1.1, color = "black", size = 5, inherit.aes = FALSE)
+
