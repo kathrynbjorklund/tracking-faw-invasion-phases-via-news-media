@@ -1,0 +1,190 @@
+year,continent,theme,prop,prop.cat
+0,Africa,Surveillance & Prevention,0.387437359,0.3-0.4
+0,Africa,Agroecological Control,0.036379905,0-0.1
+0,Africa,Conventional Control,0.176997809,0.1-0.2
+0,Africa,Government,0.205415147,0.2-0.3
+0,Africa,Research & Development,0.003518558,0-0.1
+0,Africa,Invasive Species,0.015249507,0-0.1
+0,Africa,Social Impacts,0.102112884,0.1-0.2
+0,Africa,Crop Impacts,0.05544252,0-0.1
+0,Africa,Agriculture,0.017446312,0-0.1
+0,Asia,Surveillance & Prevention,0.259069423,0.2-0.3
+0,Asia,Agroecological Control,0.056198658,0-0.1
+0,Asia,Conventional Control,0.031487182,0-0.1
+0,Asia,Government,0.220798725,0.2-0.3
+0,Asia,Research & Development,0.009466687,0-0.1
+0,Asia,Invasive Species,0.161675602,0.1-0.2
+0,Asia,Social Impacts,0.093640247,0-0.1
+0,Asia,Crop Impacts,0.149004372,0.1-0.2
+0,Asia,Agriculture,0.018659104,0-0.1
+0,Oceania,Surveillance & Prevention,0.722231783,0.7-0.8
+0,Oceania,Agroecological Control,0.079250686,0-0.1
+0,Oceania,Conventional Control,0.007544165,0-0.1
+0,Oceania,Government,0.054558256,0-0.1
+0,Oceania,Research & Development,0.000501689,0-0.1
+0,Oceania,Invasive Species,0.000248639,0-0.1
+0,Oceania,Social Impacts,0.012083083,0-0.1
+0,Oceania,Crop Impacts,0.043723692,0-0.1
+0,Oceania,Agriculture,0.079858009,0-0.1
+1,Africa,Surveillance & Prevention,0.314989669,0.3-0.4
+1,Africa,Agroecological Control,0.09380187,0-0.1
+1,Africa,Conventional Control,0.132874286,0.1-0.2
+1,Africa,Government,0.247294352,0.2-0.3
+1,Africa,Research & Development,0.01894021,0-0.1
+1,Africa,Invasive Species,0.041380378,0-0.1
+1,Africa,Social Impacts,0.063768369,0-0.1
+1,Africa,Crop Impacts,0.047673226,0-0.1
+1,Africa,Agriculture,0.03927764,0-0.1
+1,Asia,Surveillance & Prevention,0.153092636,0.1-0.2
+1,Asia,Agroecological Control,0.136945098,0.1-0.2
+1,Asia,Conventional Control,0.047290493,0-0.1
+1,Asia,Government,0.159860238,0.1-0.2
+1,Asia,Research & Development,0.045530592,0-0.1
+1,Asia,Invasive Species,0.085238624,0-0.1
+1,Asia,Social Impacts,0.294142703,0.2-0.3
+1,Asia,Crop Impacts,0.049843618,0-0.1
+1,Asia,Agriculture,0.028055998,0-0.1
+1,Oceania,Surveillance & Prevention,0.124418079,0.1-0.2
+1,Oceania,Agroecological Control,0.000771903,0-0.1
+1,Oceania,Conventional Control,0.020756895,0-0.1
+1,Oceania,Government,0.249904068,0.2-0.3
+1,Oceania,Research & Development,0.061289933,0-0.1
+1,Oceania,Invasive Species,0.00018303,0-0.1
+1,Oceania,Social Impacts,0.011890524,0-0.1
+1,Oceania,Crop Impacts,0.529480706,0.5-0.6
+1,Oceania,Agriculture,0.001304862,0-0.1
+2,Africa,Surveillance & Prevention,0.132508151,0.1-0.2
+2,Africa,Agroecological Control,0.161628963,0.1-0.2
+2,Africa,Conventional Control,0.176886308,0.1-0.2
+2,Africa,Government,0.088810666,0-0.1
+2,Africa,Research & Development,0.113167473,0.1-0.2
+2,Africa,Invasive Species,0.081888361,0-0.1
+2,Africa,Social Impacts,0.131726642,0.1-0.2
+2,Africa,Crop Impacts,0.06341308,0-0.1
+2,Africa,Agriculture,0.049970356,0-0.1
+2,Asia,Surveillance & Prevention,0.073768222,0-0.1
+2,Asia,Agroecological Control,0.106230763,0.1-0.2
+2,Asia,Conventional Control,0.050164191,0-0.1
+2,Asia,Government,0.410495883,0.4-0.5
+2,Asia,Research & Development,0.011878863,0-0.1
+2,Asia,Invasive Species,0.036994952,0-0.1
+2,Asia,Social Impacts,0.15142792,0.1-0.2
+2,Asia,Crop Impacts,0.059971483,0-0.1
+2,Asia,Agriculture,0.099067723,0-0.1
+2,Oceania,Surveillance & Prevention,0.088968478,0-0.1
+2,Oceania,Agroecological Control,0.001312961,0-0.1
+2,Oceania,Conventional Control,0.108844526,0.1-0.2
+2,Oceania,Government,0.267587181,0.2-0.3
+2,Oceania,Research & Development,0.295749447,0.2-0.3
+2,Oceania,Invasive Species,0.000164778,0-0.1
+2,Oceania,Social Impacts,0.018495732,0-0.1
+2,Oceania,Crop Impacts,0.192270189,0.1-0.2
+2,Oceania,Agriculture,0.026606708,0-0.1
+3,Africa,Surveillance & Prevention,0.127775478,0.1-0.2
+3,Africa,Agroecological Control,0.142007604,0.1-0.2
+3,Africa,Conventional Control,0.208061164,0.2-0.3
+3,Africa,Government,0.105713884,0.1-0.2
+3,Africa,Research & Development,0.095628098,0-0.1
+3,Africa,Invasive Species,0.039202196,0-0.1
+3,Africa,Social Impacts,0.176917113,0.1-0.2
+3,Africa,Crop Impacts,0.090938297,0-0.1
+3,Africa,Agriculture,0.013756165,0-0.1
+3,Asia,Surveillance & Prevention,0.079981704,0-0.1
+3,Asia,Agroecological Control,0.121434188,0.1-0.2
+3,Asia,Conventional Control,0.270116245,0.2-0.3
+3,Asia,Government,0.116527831,0.1-0.2
+3,Asia,Research & Development,0.076145144,0-0.1
+3,Asia,Invasive Species,0.021241291,0-0.1
+3,Asia,Social Impacts,0.204627741,0.2-0.3
+3,Asia,Crop Impacts,0.008605069,0-0.1
+3,Asia,Agriculture,0.101320788,0.1-0.2
+3,Oceania,Surveillance & Prevention,,
+3,Oceania,Agroecological Control,,
+3,Oceania,Conventional Control,,
+3,Oceania,Government,,
+3,Oceania,Research & Development,,
+3,Oceania,Invasive Species,,
+3,Oceania,Social Impacts,,
+3,Oceania,Crop Impacts,,
+3,Oceania,Agriculture,,
+4,Africa,Surveillance & Prevention,0.116725394,0.1-0.2
+4,Africa,Agroecological Control,0.166041711,0.1-0.2
+4,Africa,Conventional Control,0.115647115,0.1-0.2
+4,Africa,Government,0.032878396,0-0.1
+4,Africa,Research & Development,0.249307379,0.2-0.3
+4,Africa,Invasive Species,0.073203661,0-0.1
+4,Africa,Social Impacts,0.188391022,0.1-0.2
+4,Africa,Crop Impacts,0.000439172,0-0.1
+4,Africa,Agriculture,0.057366149,0-0.1
+4,Asia,Surveillance & Prevention,0.030130519,0-0.1
+4,Asia,Agroecological Control,0.121651686,0.1-0.2
+4,Asia,Conventional Control,0.45198469,0.4-0.5
+4,Asia,Government,0.144721425,0.1-0.2
+4,Asia,Research & Development,0.036918972,0-0.1
+4,Asia,Invasive Species,0.00075322,0-0.1
+4,Asia,Social Impacts,0.212193117,0.2-0.3
+4,Asia,Crop Impacts,0.000599029,0-0.1
+4,Asia,Agriculture,0.001047342,0-0.1
+4,Oceania,Surveillance & Prevention,,
+4,Oceania,Agroecological Control,,
+4,Oceania,Conventional Control,,
+4,Oceania,Government,,
+4,Oceania,Research & Development,,
+4,Oceania,Invasive Species,,
+4,Oceania,Social Impacts,,
+4,Oceania,Crop Impacts,,
+4,Oceania,Agriculture,,
+5,Africa,Surveillance & Prevention,0.101125885,0.1-0.2
+5,Africa,Agroecological Control,0.172844453,0.1-0.2
+5,Africa,Conventional Control,0.283368393,0.2-0.3
+5,Africa,Government,0.129520234,0.1-0.2
+5,Africa,Research & Development,0.109361604,0.1-0.2
+5,Africa,Invasive Species,0.023261152,0-0.1
+5,Africa,Social Impacts,0.031088056,0-0.1
+5,Africa,Crop Impacts,0.050455078,0-0.1
+5,Africa,Agriculture,0.098975145,0-0.1
+5,Asia,Surveillance & Prevention,,
+5,Asia,Agroecological Control,,
+5,Asia,Conventional Control,,
+5,Asia,Government,,
+5,Asia,Research & Development,,
+5,Asia,Invasive Species,,
+5,Asia,Social Impacts,,
+5,Asia,Crop Impacts,,
+5,Asia,Agriculture,,
+5,Oceania,Surveillance & Prevention,,
+5,Oceania,Agroecological Control,,
+5,Oceania,Conventional Control,,
+5,Oceania,Government,,
+5,Oceania,Research & Development,,
+5,Oceania,Invasive Species,,
+5,Oceania,Social Impacts,,
+5,Oceania,Crop Impacts,,
+5,Oceania,Agriculture,,
+6,Africa,Surveillance & Prevention,0.080336079,0-0.1
+6,Africa,Agroecological Control,0.282930719,0.2-0.3
+6,Africa,Conventional Control,0.227871826,0.2-0.3
+6,Africa,Government,0.006277737,0-0.1
+6,Africa,Research & Development,0.307108414,0.3-0.4
+6,Africa,Invasive Species,0.089309966,0-0.1
+6,Africa,Social Impacts,0.004916349,0-0.1
+6,Africa,Crop Impacts,0.000602035,0-0.1
+6,Africa,Agriculture,0.000646874,0-0.1
+6,Asia,Surveillance & Prevention,,
+6,Asia,Agroecological Control,,
+6,Asia,Conventional Control,,
+6,Asia,Government,,
+6,Asia,Research & Development,,
+6,Asia,Invasive Species,,
+6,Asia,Social Impacts,,
+6,Asia,Crop Impacts,,
+6,Asia,Agriculture,,
+6,Oceania,Surveillance & Prevention,,
+6,Oceania,Agroecological Control,,
+6,Oceania,Conventional Control,,
+6,Oceania,Government,,
+6,Oceania,Research & Development,,
+6,Oceania,Invasive Species,,
+6,Oceania,Social Impacts,,
+6,Oceania,Crop Impacts,,
+6,Oceania,Agriculture,,
