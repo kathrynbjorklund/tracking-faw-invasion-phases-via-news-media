@@ -1,0 +1,104 @@
+# Fig. 2
+
+# Packages
+library(readxl)
+library(ggplot2)
+library(reshape2)
+library(dplyr)
+library(ggtext)
+
+# Read data 
+theme_phase_data <- read_xlsx("PredictionHeatmapValues.xlsx")
+
+# Reshape values to long format for ggplot
+theme_phase_long <- melt(theme_phase_data, id.vars = "Theme", 
+                         variable.name = "Phase", value.name = "Value")
+
+# Define order for the themes
+new_theme_order <- c(
+  "Agriculture", 
+  "Government", 
+  "Invasive Species",
+  "Social Impacts", 
+  "Crop Impacts", 
+  "Agroecological Control", 
+  "Research & Development",
+  "Conventional Control", 
+  "Surveillance & Prevention"
+)
+
+# Convert Theme to a factor with the new order
+theme_phase_long$Theme <- factor(theme_phase_long$Theme, levels = new_theme_order)
+
+# Define theme-specific colors
+theme_colors <- c(
+  "Surveillance & Prevention" = "#1b9e77",  
+  "Agroecological Control"    = "#7570b3",  
+  "Research & Development"    = "#7570b3",
+  "Conventional Control"      = "#7570b3",
+  "Social Impacts"            = "#d95f02",  
+  "Crop Impacts"              = "#d95f02",
+  "Invasive Species"          = "#e7298a",  
+  "Government"                = "#e7298a",  
+  "Agriculture"               = "#e7298a"   
+)
+
+# Apply HTML span styling to Theme labels for color rendering
+theme_phase_long$Theme_label <- factor(
+  theme_phase_long$Theme,
+  levels = new_theme_order,
+  labels = paste0(
+    "<span style='color:", theme_colors[new_theme_order], "'>", 
+    new_theme_order,
+    "</span>"
+  )
+)
+
+# Define phase-specific colors
+phase_colors <- c(
+  "Preventing Establishment" = "#1b9e77",  
+  "Incursion Response"       = "#7570b3",  
+  "Pest Impacts"             = "#d95f02"   
+)
+
+# Apply HTML span styling to Phase labels
+theme_phase_long$Phase_label <- factor(
+  theme_phase_long$Phase,
+  levels = names(phase_colors),
+  labels = paste0(
+    "<span style='color:", phase_colors[names(phase_colors)], "'>", 
+    names(phase_colors),
+    "</span>"
+  )
+)
+
+# Value ranges for heatmap fill scale
+v_min <- min(theme_phase_long$Value, na.rm = TRUE)
+v_max <- max(theme_phase_long$Value, na.rm = TRUE)
+v_mid <- (v_min + v_max) / 2
+
+# Plot
+ggplot(theme_phase_long, aes(x = Phase_label, y = Theme_label, fill = Value)) +
+  geom_tile(color = "black") +
+  scale_fill_gradient(
+    low    = "#fee5d9",                
+    high   = "#ef3b2c",
+    limits = c(v_min, v_max),
+    breaks = c(v_min, v_mid, v_max),
+    labels = c("Low", "Medium", "High"),
+    name   = "Proportion", 
+    guide  = "legend"
+  ) +
+  theme_minimal(base_size = 12) +   
+  labs(
+    x = "Phase",
+    y = "Theme"
+  ) +
+  theme(
+    axis.title.x = element_markdown(size = 12, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    axis.text.x  = element_markdown(size = 12, margin = margin(t = 2)),
+    axis.text.y  = element_markdown(size = 12),
+    legend.title = element_text(size = 12),
+    legend.text  = element_text(size = 12)
+  )
