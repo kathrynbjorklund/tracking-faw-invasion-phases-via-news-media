@@ -1,0 +1,151 @@
+# Fig. 4
+
+# Fig. 4a
+
+# Packages
+library(tidyverse)
+library(ggtern)
+
+# Read data 
+pred.df<-read.csv("PredictionHeatmapValues2.csv",h=T)
+data.df<-read.csv(“HeatmapData.csv",h=T)
+
+data.df <- data.df %>% group_by(continent,theme) %>% 
+  mutate(propMax=prop/max(prop,na.rm = TRUE))
+
+predL.df <- pred.df %>% pivot_longer(!Theme,names_to = "Phase", values_to = "Value")
+
+predMax.df <- predL.df %>% group_by(Theme) %>% mutate(propMax=Value/max(Value,na.rm = TRUE))
+
+predMax.df <- predMax.df[,c("Theme","Phase","propMax")]
+predMax.df <- predMax.df[!is.na(predMax.df$propMax != TRUE),]
+
+predMaxW.df <- predMax.df %>% 
+  pivot_wider(names_from = Phase, values_from = propMax)
+
+data.df <- merge(data.df,predMaxW.df,by.x="theme",by.y="Theme")
+
+data.df <- data.df[!is.na(data.df$propMax != TRUE),]
+data.df <- data.df %>% mutate(distP1=abs(propMax-Phase1))
+data.df <-data.df %>% mutate(distP2=abs(propMax-Phase2))
+data.df <- data.df %>% mutate(distP3=abs(propMax-Phase3))
+
+sum.df<-data.df %>% group_by(continent,year) %>% summarise(dist1 = mean(distP1))
+sum2.df<-data.df %>% group_by(continent,year) %>% summarise(dist2 = mean(distP2))
+sum3.df<-data.df %>% group_by(continent,year) %>% summarise(dist3 = mean(distP3))
+
+
+sum.df<-merge(sum.df,sum2.df,by=c("continent","year"))
+sum.df<-merge(sum.df,sum3.df,by=c("continent","year"))
+sum.df <- sum.df %>% group_by(continent,year) %>% mutate(phase = which.min(c(dist1,dist2,dist3)))
+sum.df <- sum.df %>% group_by(continent,year) %>% mutate(min.dist = min(c(dist1,dist2,dist3)))
+sum.df <- sum.df %>% mutate(proximity=1-min.dist)
+
+write.csv(sum.df,"phase_dist3.csv",row.names = F)
+
+# Plot
+ggplot(sum.df) +
+  geom_tile(
+    aes(
+      x = year,
+      y = factor(continent, levels = rev(c("Africa", "Asia", "Oceania"))),
+      fill = factor(
+        phase,
+        levels = c("1", "2", "3"),
+        labels = c("Surveillance", "Control", "Impact")
+      ),
+      alpha = proximity
+    )
+  ) +
+  scale_fill_manual(
+    values = c(
+      "Surveillance" = "#1b9e77",
+      "Control"      = "#7570b3",
+      "Impact"       = "#d95f02"
+    ),
+    name = "Phase"
+  ) +
+  scale_alpha(range = c(0.2, 1), name = "Proximity") +   
+  theme_minimal(base_size = 12) +                       
+  labs(x = "Year", y = "Continent")
+
+# Fig. 4b 
+
+sum.df <- sum.df %>% group_by(continent,year) %>% mutate(min.dist = min(c(dist1,dist2,dist3)))
+sum.df <- sum.df %>% mutate(proximity=1-min.dist)
+sum.df <- sum.df %>% mutate(proxS=1-dist1)
+sum.df <- sum.df %>% mutate(proxC=1-dist2)
+sum.df <- sum.df %>% mutate(proxI=1-dist3)
+
+# Data frame for by year plotting
+sumYL.df<-sum.df %>% pivot_longer(cols=c("proxS","proxC","proxI"),names_to = "Phase",values_to="Proximity")
+sumYL.df$Phase <- factor(sumYL.df$Phase,levels=c("proxS","proxC","proxI"),
+                         labels=c("Surveillance","Control","Impact"))
+
+# Plot
+ggplot(data = sumYL.df, aes(x = year, y = Proximity)) +
+  geom_line(aes(group = continent), color = "black") +
+  geom_point(aes(shape = continent), size = 3, alpha = 0.7) +
+  geom_smooth(method = "loess", colour = "red", se = FALSE) +
+  theme_bw() +
+  ylim(0.3, 0.9) +
+  facet_wrap(~Phase, ncol = 1, strip.position = "top") +
+  labs(x = "Year", y = "Proximity", shape = "Continent") +
+  theme(
+    legend.position = "none",
+    strip.background = element_rect(fill = "grey80", color = "grey30"),
+    strip.placement = "outside",
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    axis.text.y = element_text(),
+    axis.ticks.y = element_line(),
+    panel.spacing = unit(1, "lines")
+  )
+
+# Fig. 4c 
+
+# Data frame for bivariate plotting
+sumBV.df <- rbind(sum.df,sum.df,sum.df)
+
+sumBV.df[,"Phase1"]<-NA
+sumBV.df[,"Phase2"]<-NA
+sumBV.df[,"Phase1N"]<-NA
+sumBV.df[,"Phase2N"]<-NA
+
+sumBV.df[1:15,"Phase1"]<-sumBV.df[1:15,"proxS"]
+sumBV.df[1:15,"Phase2"]<-sumBV.df[1:15,"proxC"]
+sumBV.df[1:15,"Phase1N"]<-"Surveillance"
+sumBV.df[1:15,"Phase2N"]<-"Control"
+
+sumBV.df[16:30,"Phase1"]<-sumBV.df[16:30,"proxS"]
+sumBV.df[16:30,"Phase2"]<-sumBV.df[16:30,"proxI"]
+sumBV.df[16:30,"Phase1N"]<-"Surveillance"
+sumBV.df[16:30,"Phase2N"]<-"Impact"
+
+sumBV.df[31:45,"Phase1"]<-sumBV.df[31:45,"proxC"]
+sumBV.df[31:45,"Phase2"]<-sumBV.df[31:45,"proxI"]
+sumBV.df[31:45,"Phase1N"]<-"Control"
+sumBV.df[31:45,"Phase2N"]<-"Impact"
+
+sumBV.df$Phase1N<-factor(sumBV.df$Phase1N,levels=c("Surveillance","Control"))
+sumBV.df$Phase2N<-factor(sumBV.df$Phase2N,levels=c("Control","Impact"))
+
+# Plot 
+ggplot(sumBV.df, aes(x = Phase1, y = Phase2)) +
+  geom_point(aes(shape = continent), color = "black", alpha = 0.7, size = 3) +
+  geom_smooth(method = "lm", colour = "black", se = TRUE) +
+  facet_wrap(Phase1N + Phase2N ~ ., ncol = 1) +
+  labs(
+    x = "Proximity to Primary Phase",
+    y = "Proximity to Secondary Phase",
+    shape = "Continent",
+    caption = "Top panel label = Primary Phase\nBottom panel label = Secondary Phase"
+  ) +
+  theme_bw() +
+  theme(
+    axis.title.y = element_text(size = 12),
+    strip.text = element_text(size = 12),
+    legend.text = element_text(size = 12),
+    plot.title = element_text(size = 12, hjust = 0.5),
+    plot.caption = element_text(hjust = 0.5, size = 12, margin = margin(t = 10))
+  )
