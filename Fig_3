@@ -1,0 +1,113 @@
+# Fig. 3
+
+# Packages
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(ggtext)
+
+# Load processed heatmap data
+theme_proportions <- read_xlsx(“HeatmapData.xlsx")
+
+# Define theme-specific colors
+theme_colors <- c(
+  "Surveillance & Prevention" = "#1b9e77",  
+  "Agroecological Control"    = "#7570b3",  
+  "Research & Development"    = "#7570b3",
+  "Conventional Control"      = "#7570b3",
+  "Social Impacts"            = "#d95f02",  
+  "Crop Impacts"              = "#d95f02",
+  "Invasive Species"          = "#e7298a",  
+  "Government"                = "#e7298a",  
+  "Agriculture"               = "#e7298a"   
+)
+
+# Order themes
+theme_order <- c(
+  "Agriculture", "Government", "Invasive Species", "Social Impacts", "Crop Impacts", 
+  "Agroecological Control", "Research & Development", "Conventional Control", 
+  "Surveillance & Prevention"
+)
+theme_proportions$theme <- factor(theme_proportions$theme, levels = theme_order)
+
+# Create colored theme labels using HTML
+theme_proportions$theme_label <- factor(
+  theme_proportions$theme,
+  levels = theme_order,
+  labels = paste0(
+    "<span style='color:", theme_colors[theme_order], "'>", 
+    theme_order, 
+    "</span>"
+  )
+)
+
+# Ensure proportion category is a factor with all levels
+theme_proportions$proportion_category <- factor(
+  theme_proportions$proportion_category,
+  levels = c("0-0.1", "0.1-0.2", "0.2-0.3", "0.3-0.4", 
+             "0.4-0.5", "0.5-0.6", "0.6-0.7", "0.7-0.8")
+)
+
+# Add dummy data to ensure full grid
+dummy_data <- expand.grid(
+  publication_date_minus_country_entry_date = min(theme_proportions$publication_date_minus_country_entry_date),
+  continent = unique(theme_proportions$continent),
+  theme = theme_order,
+  proportion_category = levels(theme_proportions$proportion_category)
+)
+dummy_data$proportion_category <- factor(dummy_data$proportion_category, 
+                                         levels = levels(theme_proportions$proportion_category))
+dummy_data$theme_label <- factor(
+  dummy_data$theme,
+  levels = theme_order,
+  labels = paste0(
+    "<span style='color:", theme_colors[theme_order], "'>", 
+    theme_order, 
+    "</span>"
+  )
+)
+
+# Plot
+ggplot() +
+  geom_tile(
+    data = dummy_data,
+    aes(x = publication_date_minus_country_entry_date, 
+        y = theme_label, 
+        fill = proportion_category),
+    color = NA
+  ) +
+  geom_tile(
+    data = theme_proportions,
+    aes(x = publication_date_minus_country_entry_date, 
+        y = theme_label, 
+        fill = proportion_category),
+    color = "black"
+  ) +
+  facet_grid(rows = vars(continent)) +
+  scale_fill_manual(
+    values = c(
+      "0-0.1" = "#fee5d9",  "0.1-0.2" = "#fcbba1", 
+      "0.2-0.3" = "#fc9272", "0.3-0.4" = "#fb6a4a", 
+      "0.4-0.5" = "#ef3b2c", "0.5-0.6" = "#cb181d", 
+      "0.6-0.7" = "#a50f15", "0.7-0.8" = "#67000d"
+    ),
+    drop = FALSE,
+    na.value = "darkgrey"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid       = element_blank(),
+    strip.background = element_blank(),
+    strip.text       = element_text(size = 12), 
+    axis.text.y      = element_markdown(size = 12),
+    axis.text.x      = element_text(size = 12),
+    axis.title.x     = element_text(size = 12, margin = margin(t = 10)),
+    axis.title.y     = element_text(size = 12, margin = margin(r = 10)),
+    legend.title     = element_text(size = 12),
+    legend.text      = element_text(size = 12)
+  ) +
+  labs(
+    x = "Year",
+    y = "Theme",
+    fill = "Proportion"
+  )
