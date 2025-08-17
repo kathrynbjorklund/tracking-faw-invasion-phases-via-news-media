@@ -1,0 +1,61 @@
+# STM Generation
+
+# Packages
+library(quanteda)
+library(stm)
+library(tm)
+library(tidyverse)
+
+# Read in csv with articles and metadata
+article_data <- read_csv("ArticlesMeta.csv")
+
+# Create a corpus
+corp = corpus(article_data, text_field = 'article')
+
+# Read in document containing crafted list of stopwords
+# Document includes some of the most common words based on domain knowledge
+# Document also includes country names, city names and ISO codes from the following source: "World Cities Database." SimpleMaps, https://simplemaps.com/data/world-cities. 
+
+stopwords <- read.csv(“SWS.csv", header = FALSE)
+stopwords <- stopwords$V1
+stopwords = na.omit(stopwords)
+summary(stopwords)
+
+#Convert all strings in corpus and stopwords to UTF-8
+library(stringi)
+corp_utf8 <- stri_enc_toutf8(corp)
+stopwords_utf8 <- stri_enc_toutf8(stopwords)
+
+#Additional stopwords
+additional_stopwords <- c("alreadi", "americanize", "americanization", "americas","â","bardiya",
+                          "cameroon", "cameroonian", "cameroon's", "china's", "drc","friday",
+                          "kenyan", "kenyans", "lanka", "lankan", "malawi",  "malawian", "malawis", 
+                          "malawi's", "matabeleland", "pradesh", "simiyu", "uk", "upazila", "wereda")
+
+#Text processing 
+#Tokenization + removal of punctuation, numbers, symbols + normalization + removal of stopwords + stemming
+tokens <- tokens(corp_utf8, remove_punct = TRUE, remove_numbers = TRUE, remove_symbols = TRUE) %>%
+  tokens_tolower() %>%
+  tokens_remove(pattern = c(stopwords('en'), stopwords, additional_stopwords)) %>%
+  tokens_wordstem()
+
+#Create dfm
+dfm <- dfm(tokens, verbose = TRUE, remove_padding = TRUE)
+
+#Trim least common words
+dfm <- dfm_trim(dfm, min_termfreq = 2)
+
+#Ensure values in publication_date_minus_country_entry_date column are numeric
+article_data$publication_date_minus_country_entry_date <- as.numeric(article_data$publication_date_minus_country_entry_date)
+
+#Prepare metadata to include necessary columns
+metadata <- data.frame(
+  publication_date_minus_country_entry_date = article_data$publication_date_minus_country_entry_date,
+  continent = article_data$continent
+)
+
+#Set seed
+set.seed(1234)
+
+#Run stm
+m <- stm(dfm, K = 33, prevalence =~ publication_date_minus_country_entry_date + continent, data = metadata, max.em.its = 1000, control = list("allow.neg.change" = FALSE))
