@@ -1,3 +1,5 @@
+# Google News Collection 
+
 # Packages
 library(tidyRSS)
 library(dplyr)
