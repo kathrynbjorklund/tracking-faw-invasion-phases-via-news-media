@@ -26,6 +26,9 @@ country_codes <- c(
   "VE","VN","VG","VI","WF","EH","YE","ZM","ZW"
 )
 
+# Progress bar
+pb <- txtProgressBar(min = 0, max = length(urls), style = 3)
+
 # Build URLs
 base_url <- "https://news.google.com/rss/search?q=armyworm+after:2016-01-01+before:2022-11-29"
 urls <- paste0(base_url, "&hl=en&gl=", country_codes, "&ceid=", country_codes, ":en")
