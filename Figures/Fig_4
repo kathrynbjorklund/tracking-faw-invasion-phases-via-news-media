@@ -7,8 +7,8 @@ library(tidyverse)
 library(ggtern)
 
 # Read data 
-pred.df<-read.csv("PredictionHeatmapValues2.csv",h=T)
-data.df<-read.csv(“HeatmapData.csv",h=T)
+pred.df<-read.csv("PredictionHeatmapValues copy.csv",h=T)
+data.df<-read.csv("HeatmapData copy.csv",h=T)
 
 data.df <- data.df %>% group_by(continent,theme) %>% 
   mutate(propMax=prop/max(prop,na.rm = TRUE))
@@ -34,7 +34,6 @@ sum.df<-data.df %>% group_by(continent,year) %>% summarise(dist1 = mean(distP1))
 sum2.df<-data.df %>% group_by(continent,year) %>% summarise(dist2 = mean(distP2))
 sum3.df<-data.df %>% group_by(continent,year) %>% summarise(dist3 = mean(distP3))
 
-
 sum.df<-merge(sum.df,sum2.df,by=c("continent","year"))
 sum.df<-merge(sum.df,sum3.df,by=c("continent","year"))
 sum.df <- sum.df %>% group_by(continent,year) %>% mutate(phase = which.min(c(dist1,dist2,dist3)))
@@ -43,31 +42,112 @@ sum.df <- sum.df %>% mutate(proximity=1-min.dist)
 
 write.csv(sum.df,"phase_dist3.csv",row.names = F)
 
+# Packages
+library(tidyverse)
+library(colorspace)
+library(ggnewscale)
+
+# Phase colors
+phase_cols <- c(
+  Surveillance = "#1b9e77",
+  Control      = "#7570b3",
+  Impact       = "#d95f02"
+)
+
+sum.df <- sum.df %>%
+  mutate(
+    Phase = factor(
+      phase,
+      levels = c(1, 2, 3),
+      labels = c("Surveillance", "Control", "Impact")
+    ),
+    base_col = phase_cols[Phase]
+  )
+
+# --- Proximity shading for tiles (unchanged logic) ---
+prox_min <- min(sum.df$proximity, na.rm = TRUE)
+prox_max <- max(sum.df$proximity, na.rm = TRUE)
+
+sum.df <- sum.df %>%
+  mutate(
+    prox_norm = (proximity - prox_min) / (prox_max - prox_min),
+    light_amt = 0.7 - 0.5 * prox_norm,
+    fill_col  = lighten(base_col, amount = light_amt)
+  )
+
+# Proximity bins for legend
+nbins <- 5
+rng    <- range(sum.df$proximity, na.rm = TRUE)
+breaks <- seq(rng[1], rng[2], length.out = nbins + 1)
+
+labels <- paste0(
+  sprintf("%.3f", head(breaks, -1)), " - ",
+  sprintf("%.3f", tail(breaks, -1))
+)
+
+sum.df <- sum.df %>%
+  mutate(
+    Prox_bin = cut(
+      proximity,
+      breaks = breaks,
+      include.lowest = TRUE,
+      labels = labels
+    )
+  )
+
+prox_cols <- grey.colors(nbins, start = 0.9, end = 0.3)
+
 # Plot
-ggplot(sum.df) +
+p <- ggplot(
+  sum.df,
+  aes(
+    x = year,
+    y = factor(continent, levels = rev(c("Africa", "Asia", "Oceania")))
+  )
+) +
+  
+  # Actual visible tiles: phase hue + proximity shading + borders
   geom_tile(
-    aes(
-      x = year,
-      y = factor(continent, levels = rev(c("Africa", "Asia", "Oceania"))),
-      fill = factor(
-        phase,
-        levels = c("1", "2", "3"),
-        labels = c("Surveillance", "Control", "Impact")
-      ),
-      alpha = proximity
+    aes(fill = fill_col),
+    color = "grey90",
+    linewidth = 0.2
+  ) +
+  scale_fill_identity() +
+  
+  theme_minimal(base_size = 12) +
+  labs(x = "Year", y = "Continent")
+
+# Add legends
+p <- p +
+  guides(
+    fill = guide_legend(title = "Phase", order = 1),
+    alpha = guide_legend(title = "Proximity", order = 2)
+  ) +
+  # Manually add Phase legend
+  geom_tile(aes(color = Phase), alpha = 0, linewidth = 0, show.legend = TRUE) +
+  scale_color_manual(
+    values = phase_cols,
+    name = "Phase",
+    guide = guide_legend(
+      order = 1,
+      override.aes = list(alpha = 1, fill = phase_cols, color = NA, linewidth = 0)
     )
   ) +
-  scale_fill_manual(
-    values = c(
-      "Surveillance" = "#1b9e77",
-      "Control"      = "#7570b3",
-      "Impact"       = "#d95f02"
-    ),
-    name = "Phase"
-  ) +
-  scale_alpha(range = c(0.2, 1), name = "Proximity") +   
-  theme_minimal(base_size = 12) +                       
-  labs(x = "Year", y = "Continent")
+  
+  ggnewscale::new_scale_color() +
+  
+  # Proximity legend
+  geom_tile(aes(color = Prox_bin), alpha = 0, linewidth = 0, show.legend = TRUE) +
+  scale_color_manual(
+    values = prox_cols,
+    name = "Proximity",
+    guide = guide_legend(
+      order = 2,
+      override.aes = list(alpha = 1, fill = prox_cols, color = NA, linewidth = 0)
+    )
+  )
+
+p
 
 # Fig. 4b 
 
