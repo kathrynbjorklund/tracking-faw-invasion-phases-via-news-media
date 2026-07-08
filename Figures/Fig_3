@@ -7,7 +7,7 @@ library(ggplot2)
 library(ggtext)
 
 # Load processed heatmap data
-theme_proportions <- read_xlsx(“HeatmapData.xlsx")
+theme_proportions <- read_xlsx("HeatmapData.xlsx")
 
 # Define theme-specific colors
 theme_colors <- c(
@@ -24,82 +24,168 @@ theme_colors <- c(
 
 # Order themes
 theme_order <- c(
-  "Agriculture", "Government", "Invasive Species", "Social Impacts", "Crop Impacts", 
-  "Agroecological Control", "Research & Development", "Conventional Control", 
+  "Agriculture",
+  "Government",
+  "Invasive Species",
+  "Social Impacts",
+  "Crop Impacts", 
+  "Agroecological Control",
+  "Research & Development",
+  "Conventional Control", 
   "Surveillance & Prevention"
 )
-theme_proportions$theme <- factor(theme_proportions$theme, levels = theme_order)
+
+# Order continents
+continent_order <- c("Africa", "Asia", "Oceania")
+
+# Define proportion levels, including NA as an explicit legend category
+prop_levels <- c(
+  "0-0.1",
+  "0.1-0.2",
+  "0.2-0.3",
+  "0.3-0.4", 
+  "0.4-0.5",
+  "0.5-0.6",
+  "0.6-0.7",
+  "0.7-0.8",
+  "NA"
+)
+
+# Format variables
+theme_proportions <- theme_proportions %>%
+  mutate(
+    theme = factor(theme, levels = theme_order),
+    continent = factor(continent, levels = continent_order),
+    proportion_category = factor(
+      proportion_category,
+      levels = prop_levels[prop_levels != "NA"]
+    )
+  )
 
 # Create colored theme labels using HTML
-theme_proportions$theme_label <- factor(
-  theme_proportions$theme,
-  levels = theme_order,
-  labels = paste0(
-    "<span style='color:", theme_colors[theme_order], "'>", 
-    theme_order, 
-    "</span>"
-  )
+# Important: these are used only as axis labels, not as the y-axis variable
+theme_labels <- paste0(
+  "<span style='color:", theme_colors[theme_order], "'>",
+  theme_order,
+  "</span>"
 )
 
-# Ensure proportion category is a factor with all levels
-theme_proportions$proportion_category <- factor(
-  theme_proportions$proportion_category,
-  levels = c("0-0.1", "0.1-0.2", "0.2-0.3", "0.3-0.4", 
-             "0.4-0.5", "0.5-0.6", "0.6-0.7", "0.7-0.8")
-)
+names(theme_labels) <- theme_order
 
-# Add dummy data to ensure full grid
-dummy_data <- expand.grid(
-  publication_date_minus_country_entry_date = min(theme_proportions$publication_date_minus_country_entry_date),
-  continent = unique(theme_proportions$continent),
-  theme = theme_order,
-  proportion_category = levels(theme_proportions$proportion_category)
-)
-dummy_data$proportion_category <- factor(dummy_data$proportion_category, 
-                                         levels = levels(theme_proportions$proportion_category))
-dummy_data$theme_label <- factor(
-  dummy_data$theme,
-  levels = theme_order,
-  labels = paste0(
-    "<span style='color:", theme_colors[theme_order], "'>", 
-    theme_order, 
-    "</span>"
+# Create a full grid so missing combinations are shown as NA tiles
+full_grid <- expand.grid(
+  publication_date_minus_country_entry_date =
+    seq(
+      min(theme_proportions$publication_date_minus_country_entry_date, na.rm = TRUE),
+      max(theme_proportions$publication_date_minus_country_entry_date, na.rm = TRUE),
+      by = 1
+    ),
+  continent = continent_order,
+  theme = theme_order
+) %>%
+  mutate(
+    continent = factor(continent, levels = continent_order),
+    theme = factor(theme, levels = theme_order)
   )
+
+# Join actual data onto full grid
+# Then convert missing values to the explicit "NA" category
+plot_data <- full_grid %>%
+  left_join(
+    theme_proportions,
+    by = c(
+      "publication_date_minus_country_entry_date",
+      "continent",
+      "theme"
+    )
+  ) %>%
+  mutate(
+    proportion_category = ifelse(
+      is.na(proportion_category),
+      "NA",
+      as.character(proportion_category)
+    ),
+    proportion_category = factor(proportion_category, levels = prop_levels)
+  )
+
+# Dummy layer to force every legend category to appear,
+# including categories absent from the actual data
+legend_dummy <- data.frame(
+  publication_date_minus_country_entry_date =
+    min(plot_data$publication_date_minus_country_entry_date, na.rm = TRUE),
+  theme = factor(theme_order[1], levels = theme_order),
+  continent = factor(continent_order[1], levels = continent_order),
+  proportion_category = factor(prop_levels, levels = prop_levels)
 )
 
 # Plot
-ggplot() +
+ggplot(
+  plot_data,
+  aes(
+    x = publication_date_minus_country_entry_date,
+    y = theme,
+    fill = proportion_category
+  )
+) +
+  # Invisible layer used only to force full legend
   geom_tile(
-    data = dummy_data,
-    aes(x = publication_date_minus_country_entry_date, 
-        y = theme_label, 
-        fill = proportion_category),
-    color = NA
+    data = legend_dummy,
+    aes(
+      x = publication_date_minus_country_entry_date,
+      y = theme,
+      fill = proportion_category
+    ),
+    color = "black",
+    linewidth = 0.2,
+    alpha = 0,
+    show.legend = TRUE,
+    inherit.aes = FALSE
   ) +
+  # Actual heatmap
   geom_tile(
-    data = theme_proportions,
-    aes(x = publication_date_minus_country_entry_date, 
-        y = theme_label, 
-        fill = proportion_category),
-    color = "black"
+    color = "black",
+    linewidth = 0.2
   ) +
   facet_grid(rows = vars(continent)) +
+  scale_y_discrete(
+    limits = theme_order,
+    labels = theme_labels
+  ) +
   scale_fill_manual(
     values = c(
-      "0-0.1" = "#fee5d9",  "0.1-0.2" = "#fcbba1", 
-      "0.2-0.3" = "#fc9272", "0.3-0.4" = "#fb6a4a", 
-      "0.4-0.5" = "#ef3b2c", "0.5-0.6" = "#cb181d", 
-      "0.6-0.7" = "#a50f15", "0.7-0.8" = "#67000d"
+      "0-0.1"   = "#fee5d9",
+      "0.1-0.2" = "#fcbba1", 
+      "0.2-0.3" = "#fc9272",
+      "0.3-0.4" = "#fb6a4a", 
+      "0.4-0.5" = "#ef3b2c",
+      "0.5-0.6" = "#cb181d", 
+      "0.6-0.7" = "#a50f15",
+      "0.7-0.8" = "#67000d",
+      "NA"      = "darkgrey"
     ),
-    drop = FALSE,
-    na.value = "darkgrey"
+    limits = prop_levels,
+    breaks = prop_levels,
+    drop = FALSE
+  ) +
+  guides(
+    fill = guide_legend(
+      override.aes = list(
+        alpha = 1,
+        color = "black",
+        linewidth = 0.2
+      )
+    )
   ) +
   theme_minimal(base_size = 12) +
   theme(
     panel.grid       = element_blank(),
     strip.background = element_blank(),
-    strip.text       = element_text(size = 12), 
-    axis.text.y      = element_markdown(size = 12),
+    strip.text       = element_text(size = 12),
+    
+    # Key fix for colored y-axis labels
+    axis.text.y      = ggtext::element_markdown(size = 12),
+    axis.text.y.left = ggtext::element_markdown(size = 12),
+    
     axis.text.x      = element_text(size = 12),
     axis.title.x     = element_text(size = 12, margin = margin(t = 10)),
     axis.title.y     = element_text(size = 12, margin = margin(r = 10)),
